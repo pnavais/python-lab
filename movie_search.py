@@ -32,19 +32,19 @@ import datetime
 # Constants
 # #########
 
-RED          ="\u001b[31m"
-YELLOW       ="\u001b[33m"
-BLUE         ="\u001b[34m"
-WHITE        ="\u001b[37m"
-GREEN        ="\u001b[32m"
-RESET        ="\u001b[0m"
-BOLD         ="\u001b[1m"
-UNDERLINE    ="\u001b[4m"
-SAVE_CUR     ="\033[s"
-RESET_CUR    ="\033[u"
-CLEAR_RIGHT  ="\033[K"
-CHECK_SYMBOL ="\u2713"
-CROSS_SYMBOL ="\u274C"
+RED          = "\u001b[31m"
+YELLOW       = "\u001b[33m"
+BLUE         = "\u001b[34m"
+WHITE        = "\u001b[37m"
+GREEN        = "\u001b[32m"
+RESET        = "\u001b[0m"
+BOLD         = "\u001b[1m"
+UNDERLINE    = "\u001b[4m"
+SAVE_CUR     = "\033[s"
+RESET_CUR    = "\033[u"
+CLEAR_RIGHT  = "\033[K"
+CHECK_SYMBOL = "\u2713"
+CROSS_SYMBOL = "\u274C"
 
 MOVIE_DB_SEARCH_URL = "https://api.themoviedb.org/3/search/movie?api_key=<api_key>&query=<query>&page=<page>"
 
@@ -143,8 +143,13 @@ def findMovie():
 			
 				movies_result = r_json['results'];
 				for movie in movies_result:
-					date_time = datetime.datetime.strptime(movie['release_date'], '%Y-%m-%d')
-					movies_list.append(movie['title']+" - (" +str(date_time.date().year)+")")
+					try:
+						date_time = datetime.datetime.strptime(movie['release_date'], '%Y-%m-%d')
+						year = str(date_time.date().year)
+					except:
+						year = "????"
+						pass
+					movies_list.append(movie['title']+" - ("+year+")")
 				current_page+=1
 				more_pages = (current_page<=total_pages)
 			else:
