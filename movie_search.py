@@ -26,7 +26,7 @@ import datetime
 
 #
 # A little utility script to search movies using TheMovieDB REST API
-# 
+# Usage : movie_search.py -a <MOVIE_DB_API_KEY> -n <MOVIE_NAME>
 ####################################################################
 
 # Constants
