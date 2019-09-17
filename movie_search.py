@@ -15,14 +15,13 @@
 # limitations under the License.
 
 import os
-import time
-import sys, getopt
 import re
-import requests
-import threading
-import _thread
-import urllib.parse
+import sys, getopt
 import datetime
+import time
+import threading
+import requests
+import urllib.parse
 
 #
 # A little utility script to search movies using TheMovieDB REST API
@@ -120,13 +119,37 @@ def parseCmd(argv):
 	if not (movie_name):
 		print(red("Missing Movie Name"))
 		sys.exit(4)
+
+"""
+Simply displays a waiting message
+until interrupted or nmovies found
+"""
+def waitLoop():
+	global movies_list
+
+	try:
+		while not movies_list:
+			for j in range(0,3):				
+				sys.stdout.write(".")
+				sys.stdout.flush()
+				time.sleep(0.3)	
+			sys.stdout.write(RESET_CUR)
+			sys.stdout.write(CLEAR_RIGHT)
+			sys.stdout.flush()
+			time.sleep(0.5)
+	except:
+		pass
+
+	sys.stdout.write(RESET_CUR)
+	sys.stdout.write(CLEAR_RIGHT)
+	symbol=green(CHECK_SYMBOL) if movies_list else red(CROSS_SYMBOL)
+	sys.stdout.write(symbol)
+	sys.stdout.flush()
+
 """
 Find the given movie
 """
-def findMovie():	
-	global movies_list
-	global api_key
-	global movie_name
+def findMovie(api_key, movie_name):	
 
 	try:
 		current_page = 1
@@ -157,8 +180,8 @@ def findMovie():
 
 	except Exception as e:
 		print("Error processing request : "+str(e))
-		
-	_thread.interrupt_main()
+
+	return movies_list
 
 """ Main function """
 def main(argv):
@@ -169,27 +192,12 @@ def main(argv):
 	time.sleep(1)
 
 	# Launch the movie search thread
-	t = threading.Thread(target=findMovie)
+	t = threading.Thread(target=waitLoop)
 	t.start()
 
-	try:
-		while not movies_list:
-			for j in range(0,3):				
-				sys.stdout.write(".")
-				sys.stdout.flush()
-				time.sleep(0.3)	
-			sys.stdout.write(RESET_CUR)
-			sys.stdout.write(CLEAR_RIGHT)
-			sys.stdout.flush()
-			time.sleep(0.5)
-	except: 		
-		pass
+	movies_list = findMovie(api_key, movie_name)
+	t.join()
 
-	sys.stdout.write(RESET_CUR)
-	sys.stdout.write(CLEAR_RIGHT)
-	symbol=green(CHECK_SYMBOL) if movies_list else red(CROSS_SYMBOL)
-	sys.stdout.write(symbol)
-	sys.stdout.flush()
 
 	if movies_list:
 		movies_list_size = len(movies_list);
@@ -209,5 +217,4 @@ if __name__ == "__main__":
 	try:
 		main(sys.argv[1:])
 	except KeyboardInterrupt as e:
-		print("")
 		sys.exit(0)
