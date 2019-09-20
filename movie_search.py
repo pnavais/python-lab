@@ -53,6 +53,7 @@ MOVIE_DB_SEARCH_URL = "https://api.themoviedb.org/3/search/movie?api_key=<api_ke
 api_key     = ''
 movie_name  = ''
 movies_list = []
+max_movies  = -1
 
 """
 Return an ANSI red colored string
@@ -86,6 +87,7 @@ def showHelp():
 	print("\nWhere :")
 	print("\t-a, --api:  the MovieDB API key")
 	print("\t-n, --name: the name of the movie to search")
+	print("\t-m, --max:  the maximum number of movies to show")
 	print("\t-h, --help: this help")
 
 """
@@ -95,9 +97,10 @@ and retrieves the actual parameters.
 def parseCmd(argv):
 	global api_key
 	global movie_name
+	global max_movies
 
 	try:
-		opts, args = getopt.getopt(argv,"ha:n:",["help","api=","name="])
+		opts, args = getopt.getopt(argv,"ha:n:m:",["help","api=","name=","max="])
 	except getopt.GetoptError as e:	
 		print("\n"+red(str(e))+"\n", file=sys.stderr)
 		showHelp()
@@ -111,6 +114,8 @@ def parseCmd(argv):
 			api_key = arg
 		elif opt in ("-n", "--name"):
 			movie_name = arg
+		elif opt in ("-m", "--max"):
+			max_movies = int(arg) if arg.isdigit() else 0
 
 	if not (api_key):
 		print(red("Missing MovieDB API key"))
@@ -119,6 +124,9 @@ def parseCmd(argv):
 	if not (movie_name):
 		print(red("Missing Movie Name"))
 		sys.exit(4)
+	if (max_movies == 0):
+		print(red("Invalid maximum number of movies"))
+		sys.exit(5)
 
 """
 Simply displays a waiting message
@@ -149,7 +157,7 @@ def waitLoop():
 """
 Find the given movie
 """
-def findMovie(api_key, movie_name):	
+def findMovie(api_key, movie_name, max_movies):
 
 	try:
 		current_page = 1
@@ -171,12 +179,16 @@ def findMovie(api_key, movie_name):
 						year = str(date_time.date().year)
 					except:
 						year = "????"
-						pass
+						pass						
 					movies_list.append(movie['title']+" - ("+year+")")
+					if ((max_movies>0) and (len(movies_list)>=max_movies)):
+						break
 				current_page+=1
-				more_pages = (current_page<=total_pages)
+				more_pages = (current_page<=total_pages)				
 			else:
 				more_pages = False
+			if ((max_movies>0) and (len(movies_list)>=max_movies)):
+				break
 
 	except Exception as e:
 		print("Error processing request : "+str(e))
@@ -195,7 +207,7 @@ def main(argv):
 	t = threading.Thread(target=waitLoop)
 	t.start()
 
-	movies_list = findMovie(api_key, movie_name)
+	movies_list = findMovie(api_key, movie_name, max_movies)
 	t.join()
 
 
