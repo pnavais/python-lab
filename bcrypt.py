@@ -15,7 +15,7 @@ class bcolors:
 
 parser = argparse.ArgumentParser(description='Encodes a password with BCrypt')
 
-parser.add_argument('-p', '--password', dest='password', metavar='password', action='append', required=True, help='The password to encode')
+parser.add_argument('-p', '--password', dest='password', metavar='password', required=True, help='The password to encode')
 parser.add_argument('-s', '--salt', dest='salt', metavar='salt', required=False, help='The salt to use in BCrypt. Generated automatically if not provided')
 parser.add_argument('-r', '--rounds', dest='rounds', type=int, metavar='rounds', required=False, help='The number of rounds to use when generating salt')
 parser.add_argument('--show', dest='show', action='store_true', required=False, help='Displays generated salt')
@@ -41,5 +41,5 @@ else:
     if show:
         print("User salt: %s" % salt.decode())
 
-password = bcrypt.hashpw(sys.argv[1].encode('utf-8'), salt)
+password = bcrypt.hashpw(password.encode('utf-8'), salt)
 print(password.decode())
